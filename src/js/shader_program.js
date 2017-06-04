@@ -89,6 +89,9 @@ ShaderProgram.prototype.createShaderProgram = function(gl, vertex_shader, fragme
 		throw new Error("Could not initialize shaders:\n\n" + gl.getProgramInfoLog(shaderProgram));
 	}
 
+	// WebGL_API 19. プログラムを有効にする
+	gl.useProgram(shaderProgram);
+
 	return shaderProgram;
 };
 

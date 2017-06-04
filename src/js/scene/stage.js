@@ -68,9 +68,6 @@ SceneTitle.prototype.beforeDraw = function(){
 
 
 SceneTitle.prototype.draw = function(){
-	// プログラムオブジェクトを有効にする
-	this.shader_program.useProgram();
-
 	// Canvasの大きさとビューポートの大きさを合わせる
 	this.core.gl.viewport(0, 0, this.core.width, this.core.height);
 
