@@ -54,6 +54,9 @@ SceneTitle.prototype.init = function(){
 	glmat.mat4.identity(vpMatrix);
 	glmat.mat4.multiply(vpMatrix, pMatrix, vMatrix);
 	this.vpMatrix = vpMatrix;
+
+
+	this.mvpMatrix = glmat.mat4.create();
 };
 
 
@@ -62,6 +65,15 @@ SceneTitle.prototype.init = function(){
 
 SceneTitle.prototype.beforeDraw = function(){
 	base_scene.prototype.beforeDraw.apply(this, arguments);
+
+	glmat.mat4.identity(this.mvpMatrix);
+
+	var rad = (this.frame_count % 360) * Math.PI / 180;
+	var mMatrix = glmat.mat4.create();
+	glmat.mat4.identity(mMatrix);
+	glmat.mat4.rotate(mMatrix, mMatrix, rad, [0, 1, 0]);
+
+	glmat.mat4.multiply(this.mvpMatrix, this.vpMatrix, mMatrix);
 
 	this.triangle.update();
 };
@@ -79,19 +91,9 @@ SceneTitle.prototype.draw = function(){
 
 
 SceneTitle.prototype.renderTriangle = function(){
-	var mvpMatrix = glmat.mat4.create();
-	glmat.mat4.identity(mvpMatrix);
-
-	var rad = (this.frame_count % 360) * Math.PI / 180;
-	var mMatrix = glmat.mat4.create();
-	glmat.mat4.identity(mMatrix);
-	glmat.mat4.rotate(mMatrix, mMatrix, rad, [0, 1, 0]);
-
-	glmat.mat4.multiply(mvpMatrix, this.vpMatrix, mMatrix);
-
 	// WebGL_API 21. uniform 変数にデータを登録する
 	// 4fv -> vec4, 3fv -> vec3, 1f -> float
-	this.core.gl.uniformMatrix4fv(this.shader_program.uniform_locations.mvpMatrix, false, mvpMatrix);
+	this.core.gl.uniformMatrix4fv(this.shader_program.uniform_locations.mvpMatrix, false, this.mvpMatrix);
 
 	// attribute 変数にデータを登録する
 	this.attribSetup(this.shader_program.attribute_locations.position, this.triangle.positionObject,  3);
