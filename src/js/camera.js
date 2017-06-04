@@ -3,7 +3,7 @@ var glmatrix = require("gl-matrix");
 var Util = require('./hakurei').util;
 
 // constant
-var thetaLimits = [1.5*Math.PI, 1.8*Math.PI];
+var thetaLimits = [0.0*Math.PI, 1.8*Math.PI];
 var distanceLimits = [2.0, 15.0];
 var zoomWeight = 0.1;
 
@@ -12,7 +12,7 @@ var Camera = function() {
 	glmatrix.mat4.identity(this.vMatrix);
 
 	//this.theta = [1.7*Math.PI, 0.0, 0.5*Math.PI]; // Rotation about X and Z axes
-	this.theta = [1.7*Math.PI, 0, 0.0*Math.PI];
+	this.theta = [0.0*Math.PI, 0, 0.0*Math.PI];
 	this.center = [0, 0, 0];
 	this.up = [0, 1, 0];
 	this.eye = [0, 0, 0];

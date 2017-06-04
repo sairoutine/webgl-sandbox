@@ -7,6 +7,7 @@ var ShaderProgram = require('../shader_program');
 var VS = require('../shader/main.vs');
 var FS = require('../shader/main.fs');
 var Myon = require('../myon');
+var FPS = require('../fps');
 var Camera = require('../camera');
 var glmat = require("gl-matrix");
 
@@ -36,7 +37,7 @@ SceneTitle.prototype.init = function(){
 	);
 
 	//this.triangle = new Triangle(this.core.gl);
-	this.myon = new Myon(this.core.gl, this.core.image_loader.getImage("myon"));
+	this.myon = new FPS(this.core.gl);
 
 	/*
 	var light_color       = [1.0, 0.5, 0.0];
@@ -92,10 +93,10 @@ SceneTitle.prototype.beforeDraw = function(){
 	// model matrix
 	glmat.mat4.identity(this.mvpMatrix);
 
-	var rad = (this.frame_count % 360) * Math.PI / 180;
+	//var rad = (this.frame_count % 360) * Math.PI / 180;
 	var mMatrix = glmat.mat4.create();
 	glmat.mat4.identity(mMatrix);
-	glmat.mat4.rotate(mMatrix, mMatrix, rad, [0, 1, 0]);
+	//glmat.mat4.rotate(mMatrix, mMatrix, rad, [0, 1, 0]);
 
 	glmat.mat4.multiply(this.mvpMatrix, vpMatrix, mMatrix);
 
