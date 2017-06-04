@@ -37,7 +37,8 @@ SceneTitle.prototype.init = function(){
 	);
 
 	//this.triangle = new Triangle(this.core.gl);
-	this.myon = new FPS(this.core.gl);
+	this.fps = new FPS(this.core.gl);
+	this.myon = new Myon(this.core.gl, this.core.image_loader.getImage("myon"));
 
 	/*
 	var light_color       = [1.0, 0.5, 0.0];
@@ -102,21 +103,31 @@ SceneTitle.prototype.beforeDraw = function(){
 
 	// 三角形更新
 	this.myon.update();
+	this.fps.update();
 };
 
 
 SceneTitle.prototype.draw = function(){
+	var gl = this.core.gl;
 	// Canvasの大きさとビューポートの大きさを合わせる
 	this.core.gl.viewport(0, 0, this.core.width, this.core.height);
 
-	this.renderTriangle();
+	this.core.gl.enable(this.core.gl.BLEND);
+	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+	gl.enable(gl.DEPTH_TEST);
+	gl.depthFunc(gl.LEQUAL);
+
+
+	this.renderMyon();
+	this.renderFPS();
 
 	// WebGL_API 29. 描画
 	this.core.gl.flush();
 };
 
 
-SceneTitle.prototype.renderTriangle = function(){
+SceneTitle.prototype.renderMyon = function(){
 	// WebGL_API 21. uniform 変数にデータを登録する
 	// 4fv -> vec4, 3fv -> vec3, 1f -> float
 	this.core.gl.uniformMatrix4fv(this.shader_program.uniform_locations.mvpMatrix, false, this.mvpMatrix);
@@ -137,6 +148,32 @@ SceneTitle.prototype.renderTriangle = function(){
 	this.core.gl.bindBuffer(this.core.gl.ELEMENT_ARRAY_BUFFER, this.myon.indexObject);
 	this.core.gl.drawElements(this.core.gl.TRIANGLES, this.myon.numVertices(), this.core.gl.UNSIGNED_SHORT, 0);
 };
+
+SceneTitle.prototype.renderFPS = function(){
+	// WebGL_API 21. uniform 変数にデータを登録する
+	// 4fv -> vec4, 3fv -> vec3, 1f -> float
+	this.core.gl.uniformMatrix4fv(this.shader_program.uniform_locations.mvpMatrix, false, this.mvpMatrix);
+
+	// attribute 変数にデータを登録する
+	this.attribSetup(this.shader_program.attribute_locations.position, this.fps.positionObject,  3);
+	this.attribSetup(this.shader_program.attribute_locations.color, this.fps.colorObject,  4);
+	this.attribSetup(this.shader_program.attribute_locations.textureCoord, this.fps.textureObject,  2);
+
+	// WebGL_API 25. 有効にするテクスチャユニットを指定(今回は0)
+	this.core.gl.activeTexture(this.core.gl.TEXTURE0);
+	// WebGL_API 26. テクスチャをバインドする
+	this.core.gl.bindTexture(this.core.gl.TEXTURE_2D, this.fps.texture);
+	// WebGL_API 27. テクスチャデータをシェーダに送る(ユニット 0)
+	this.core.gl.uniform1i(this.shader_program.uniform_locations.uSampler, 0);
+
+	// WebGL_API 28. 送信
+	this.core.gl.bindBuffer(this.core.gl.ELEMENT_ARRAY_BUFFER, this.fps.indexObject);
+	this.core.gl.drawElements(this.core.gl.TRIANGLES, this.fps.numVertices(), this.core.gl.UNSIGNED_SHORT, 0);
+};
+
+
+
+
 
 SceneTitle.prototype.attribSetup = function(attribute_location, buffer_object, size, type) {
 	if (!type) {
