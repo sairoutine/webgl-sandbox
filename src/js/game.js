@@ -13,7 +13,11 @@ Game.prototype.init = function () {
 
 	this.addScene("stage", new SceneStage(this));
 
-	this.changeSceneWithLoading("stage");
+	this.changeSceneWithLoading("stage", {
+		images: {
+			myon: "./image/myon.png",
+		}
+	});
 };
 
 module.exports = Game;

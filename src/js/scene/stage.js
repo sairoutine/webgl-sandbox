@@ -6,7 +6,7 @@ var CONSTANT = require('../hakurei').constant;
 var ShaderProgram = require('../shader_program');
 var VS = require('../shader/main.vs');
 var FS = require('../shader/main.fs');
-var Triangle = require('../triangle');
+var Myon = require('../myon');
 var Camera = require('../camera');
 var glmat = require("gl-matrix");
 
@@ -26,14 +26,17 @@ SceneTitle.prototype.init = function(){
 		[
 			"position",
 			"color",
+			"textureCoord",
 		],
 		// uniform 変数一覧(頂点毎に同じデータ)
 		[
 			"mvpMatrix",
+			"uSampler",
 		]
 	);
 
-	this.triangle = new Triangle(this.core.gl);
+	//this.triangle = new Triangle(this.core.gl);
+	this.myon = new Myon(this.core.gl, this.core.image_loader.getImage("myon"));
 
 	/*
 	var light_color       = [1.0, 0.5, 0.0];
@@ -97,7 +100,7 @@ SceneTitle.prototype.beforeDraw = function(){
 	glmat.mat4.multiply(this.mvpMatrix, vpMatrix, mMatrix);
 
 	// 三角形更新
-	this.triangle.update();
+	this.myon.update();
 };
 
 
@@ -118,22 +121,20 @@ SceneTitle.prototype.renderTriangle = function(){
 	this.core.gl.uniformMatrix4fv(this.shader_program.uniform_locations.mvpMatrix, false, this.mvpMatrix);
 
 	// attribute 変数にデータを登録する
-	this.attribSetup(this.shader_program.attribute_locations.position, this.triangle.positionObject,  3);
-	this.attribSetup(this.shader_program.attribute_locations.color, this.triangle.colorObject,  4);
+	this.attribSetup(this.shader_program.attribute_locations.position, this.myon.positionObject,  3);
+	this.attribSetup(this.shader_program.attribute_locations.color, this.myon.colorObject,  4);
+	this.attribSetup(this.shader_program.attribute_locations.textureCoord, this.myon.textureObject,  2);
 
-	/*
-	// TODO: player.bindTexture() に移動
 	// WebGL_API 25. 有効にするテクスチャユニットを指定(今回は0)
 	this.core.gl.activeTexture(this.core.gl.TEXTURE0);
 	// WebGL_API 26. テクスチャをバインドする
-	this.core.gl.bindTexture(this.core.gl.TEXTURE_2D, this.player.texture);
+	this.core.gl.bindTexture(this.core.gl.TEXTURE_2D, this.myon.texture);
 	// WebGL_API 27. テクスチャデータをシェーダに送る(ユニット 0)
-	this.core.gl.uniform1i(this.sprites_shader_program.uniform_locations.uSampler, 0);
-	*/
+	this.core.gl.uniform1i(this.shader_program.uniform_locations.uSampler, 0);
 
 	// WebGL_API 28. 送信
-	this.core.gl.bindBuffer(this.core.gl.ELEMENT_ARRAY_BUFFER, this.triangle.indexObject);
-	this.core.gl.drawElements(this.core.gl.TRIANGLES, this.triangle.numVertices(), this.core.gl.UNSIGNED_SHORT, 0);
+	this.core.gl.bindBuffer(this.core.gl.ELEMENT_ARRAY_BUFFER, this.myon.indexObject);
+	this.core.gl.drawElements(this.core.gl.TRIANGLES, this.myon.numVertices(), this.core.gl.UNSIGNED_SHORT, 0);
 };
 
 SceneTitle.prototype.attribSetup = function(attribute_location, buffer_object, size, type) {
