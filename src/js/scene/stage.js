@@ -7,6 +7,7 @@ var ShaderProgram = require('../shader_program');
 var VS = require('../shader/main.vs');
 var FS = require('../shader/main.fs');
 var Triangle = require('../triangle');
+var Camera = require('../camera');
 var glmat = require("gl-matrix");
 
 var SceneTitle = function(core) {
@@ -39,22 +40,14 @@ SceneTitle.prototype.init = function(){
 	var light_position    = [0,0,1];
 	var light_attenuation = [0.3, 0.1, 0.05];
 	this.light = new PointLight(light_color, light_position, light_attenuation);
-	this.camera = new Camera();
 	*/
+	this.camera = new Camera();
 
-	var vMatrix = glmat.mat4.create();
-	glmat.mat4.identity(vMatrix);
-	glmat.mat4.lookAt(vMatrix, [0.0, 0.0, 5.0], [0, 0, 0], [0, 1, 0]); // eye, center, up
-
+	// perspective matrix
 	var pMatrix = glmat.mat4.create();
 	glmat.mat4.identity(pMatrix);
 	glmat.mat4.perspective(pMatrix, 45.0, this.core.width/this.core.height, 0.1, 100.0);
-
-	var vpMatrix = glmat.mat4.create();
-	glmat.mat4.identity(vpMatrix);
-	glmat.mat4.multiply(vpMatrix, pMatrix, vMatrix);
-	this.vpMatrix = vpMatrix;
-
+	this.pMatrix = pMatrix;
 
 	this.mvpMatrix = glmat.mat4.create();
 };
@@ -66,6 +59,34 @@ SceneTitle.prototype.init = function(){
 SceneTitle.prototype.beforeDraw = function(){
 	base_scene.prototype.beforeDraw.apply(this, arguments);
 
+	var rotateSpeed = 0.01;
+	// カメラ移動
+	if (this.core.isLeftClickDown()) {
+		var angleChange = [
+			-this.core.mouseMoveY() * rotateSpeed,
+			0,
+			this.core.mouseMoveX() * rotateSpeed
+		];
+		this.camera.changeAngle(angleChange);
+	}
+
+	// ズーム
+	if (this.core.mouseScroll()) {
+		this.camera.changeDistance(this.core.mouseScroll());
+	}
+
+	// カメラ更新
+	this.camera.moveCenter([0.0, 0.0, 0.0]);
+	this.camera.updateMatrix();
+
+	// view matrix
+	var vMatrix = this.camera.vMatrix;
+	var vpMatrix = glmat.mat4.create();
+	glmat.mat4.identity(vpMatrix);
+
+	glmat.mat4.multiply(vpMatrix, this.pMatrix, vMatrix);
+
+	// model matrix
 	glmat.mat4.identity(this.mvpMatrix);
 
 	var rad = (this.frame_count % 360) * Math.PI / 180;
@@ -73,8 +94,9 @@ SceneTitle.prototype.beforeDraw = function(){
 	glmat.mat4.identity(mMatrix);
 	glmat.mat4.rotate(mMatrix, mMatrix, rad, [0, 1, 0]);
 
-	glmat.mat4.multiply(this.mvpMatrix, this.vpMatrix, mMatrix);
+	glmat.mat4.multiply(this.mvpMatrix, vpMatrix, mMatrix);
 
+	// 三角形更新
 	this.triangle.update();
 };
 
