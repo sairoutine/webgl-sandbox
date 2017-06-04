@@ -85,10 +85,10 @@ SceneTitle.prototype.renderTriangle = function(){
 	var mvpMatrix = glmat.mat4.create();
 	glmat.mat4.identity(mvpMatrix);
 
-	//var rad = (this.frame_count % 360) * Math.PI / 180;
+	var rad = (this.frame_count % 360) * Math.PI / 180;
 	var mMatrix = glmat.mat4.create();
 	glmat.mat4.identity(mMatrix);
-	//glmat.mat4.rotate(mMatrix, mMatrix, rad, [0, 1, 0]);
+	glmat.mat4.rotate(mMatrix, mMatrix, rad, [0, 1, 0]);
 
 	glmat.mat4.multiply(mvpMatrix, this.vpMatrix, mMatrix);
 
@@ -97,8 +97,8 @@ SceneTitle.prototype.renderTriangle = function(){
 	this.core.gl.uniformMatrix4fv(this.shader_program.uniform_locations.mvpMatrix, false, mvpMatrix);
 
 	// attribute 変数にデータを登録する
-	this.attribSetup(this.shader_program.uniform_locations.position, this.triangle.positionObject,  3);
-	this.attribSetup(this.shader_program.uniform_locations.color, this.triangle.colorObject,  4);
+	this.attribSetup(this.shader_program.attribute_locations.position, this.triangle.positionObject,  3);
+	this.attribSetup(this.shader_program.attribute_locations.color, this.triangle.colorObject,  4);
 
 	/*
 	// TODO: player.bindTexture() に移動
